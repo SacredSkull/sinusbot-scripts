@@ -1,6 +1,6 @@
 registerPlugin({
     name: "Now Playing",
-    version: "0.4",
+    version: "0.5",
     description: "Sets a channel/spacer to the currently playing song.",
     author: "SacredSkull <me@sacredskull.net>",
     vars: {
@@ -46,6 +46,11 @@ registerPlugin({
         }
     }
 }, function(sinusbot, config) {
+    var engine = require('engine');
+    var backend = require('backend');
+    var media = require('media');
+    var audio = require('audio');
+
     var defaultTitleFormat = "[cspacer0]♫ %trackInfo ♫";
     var defaultArtistFormat = "[cspacer0]🎧 %trackInfo 🎧";
     var defaultNothingPlaying = "[cspacer0]♫ Playing nothing :( ♫";
@@ -128,17 +133,20 @@ registerPlugin({
         return fullTitle;
     }
 
-    sinusbot.on('stop', function(ev) {
-        if('undefined' !== typeof config.TitleChannel){
-            sinusbot.channelUpdate(config.TitleChannel, {
-                "name": config.NothingPlayingName
-            });
-        }
+    sinusbot.on('trackEnd', function(ev) {
+        if(media.getQueue().length == 0 && !audio.isPlaying()) {
+            lastTrackGuard = false;
+            if('undefined' !== typeof config.TitleChannel){
+                sinusbot.channelUpdate(config.TitleChannel, {
+                    "name": config.NothingPlayingName
+                });
+            }
 
-        if('undefined' !== typeof config.ArtistChannel){
-            sinusbot.channelUpdate(config.ArtistChannel, {
-                "name": ComposeSpacerName("-", defaultArtistFormat, defaultArtistFormat)
-            });
+            if('undefined' !== typeof config.ArtistChannel){
+                sinusbot.channelUpdate(config.ArtistChannel, {
+                    "name": ComposeSpacerName("-", defaultArtistFormat, defaultArtistFormat)
+                });
+            }
         }
     });
 
