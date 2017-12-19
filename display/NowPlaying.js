@@ -1,8 +1,9 @@
 registerPlugin({
     name: "Now Playing",
-    version: "0.5",
-    description: "Sets a channel/spacer to the currently playing song.",
+    version: "0.6",
+    description: "Sick of users asking what song that is? No longer!",
     author: "SacredSkull <me@sacredskull.net>",
+    license: "MIT",
     vars: {
         TitleChannel: {
             title: "Title Channel - Channel/spacer to display the track title.",
@@ -48,6 +49,7 @@ registerPlugin({
 }, function(sinusbot, config) {
     var engine = require('engine');
     var backend = require('backend');
+    var events = require('event');
     var media = require('media');
     var audio = require('audio');
 
@@ -133,7 +135,7 @@ registerPlugin({
         return fullTitle;
     }
 
-    sinusbot.on('trackEnd', function(ev) {
+    events.on('trackEnd', function(ev) {
         if(media.getQueue().length == 0 && !audio.isPlaying()) {
             lastTrackGuard = false;
             if('undefined' !== typeof config.TitleChannel){
@@ -151,7 +153,7 @@ registerPlugin({
     });
 
     var trackRegex = new RegExp(/^(.*?)[ ]?(?:[-,] (.*?)$|(?: ['"])(.*?)['"]$)/i);
-    sinusbot.on('trackInfo', function(ev) {
+    events.on('trackInfo', function(ev) {
         if('undefined' !== typeof config.TitleChannel){
             sinusbot.channelUpdate(config.TitleChannel, {
                 "name": "[cspacer0]"
@@ -163,29 +165,29 @@ registerPlugin({
             });
         }
 
-        sinusbot.log("Received new track event for " + ev.title + " by " + ev.artist);
+        sinusbot.log("Received new track event for " + ev.title() + " by " + ev.artist());
         var rawTitle = "Unknown";
         var rawArtist = "Unknown";
         var title = "";
         var artist = "";
         var album = "";
 
-        if('undefined' !== typeof ev.tempTitle) {
-            title = ev.tempTitle;
-            artist = ev.tempArtist;
+        if('undefined' !== typeof ev.tempTitle() && ev.tempTitle().length > 0) {
+            title = ev.tempTitle();
+            artist = ev.tempArtist();
 
-            title = ComposeSpacerName(ev.tempTitle, config.TitleChannelFormat, defaultTitleFormat);
-            artist = ComposeSpacerName(ev.tempArtist, config.ArtistChannelFormat, defaultArtistFormat);
+            title = ComposeSpacerName(ev.tempTitle(), config.TitleChannelFormat, defaultTitleFormat);
+            artist = ComposeSpacerName(ev.tempArtist(), config.ArtistChannelFormat, defaultArtistFormat);
 
-            rawArtist = ev.tempArtist;
-            rawTitle = ev.tempTitle;
+            rawArtist = ev.tempArtist();
+            rawTitle = ev.tempTitle();
         } else {
             // Cleanup so we can test for the "artist - title" format.
-            title = CleanTag(ev.title, bleacher);
-            artist = CleanTag(ev.artist, bleacher);
-            album = CleanTag(ev.album, bleacher);
+            title = CleanTag(ev.title(), bleacher);
+            artist = CleanTag(ev.artist(), bleacher);
+            album = CleanTag(ev.album(), bleacher);
 
-            if('undefined' !== typeof title) {
+            if('undefined' !== typeof title && title.length > 0) {
                 rawArtist = String(artist);
                 rawTitle = String(title);
 
