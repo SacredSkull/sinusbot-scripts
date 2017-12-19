@@ -1,6 +1,6 @@
 registerPlugin({
     name: 'Skipper',
-    version: '0.1',
+    version: '0.2',
     description: 'A good skipper avoids munity by allowing his mates to skip songs!',
     author: 'SacredSkull <me@sacredskull.net>',
     vars: {
@@ -11,21 +11,24 @@ registerPlugin({
         },
     }
 }, function(sinusbot, config) {
+    var event = require('event');
+    var backend = require('backend');
+
     var commandRegex = new RegExp(/^!skip(?: \w*?)??$/i);
     var votedUsers = [];
     var neededVotes = 1;
 
     sinusbot.chatChannel();
 
-    sinusbot.on('trackInfo', function(ev) {
+    event.on('trackInfo', function(ev) {
         votedUsers = [];
     });
 
-    sinusbot.on('chat', function(ev) {
-            var match = String(ev.msg).match(commandRegex);
+    event.on('chat', function(ev) {
+            var match = String(ev.text).match(commandRegex);
             if(match != null){
                 if(ev.mode == 2){
-                    parseVote(ev.clientUid);
+                    parseVote(ev.client.id());
                 } else {
                     var channels = sinusbot.getChannels();
                     var botChannel = null;
@@ -33,28 +36,30 @@ registerPlugin({
 
                     for(var i = 0; i < channels.length; i++){
                         for (var client = 0; client < channels[i].clients.length; client++) {
-                            if(channels[i].clients[client].id == sinusbot.getBotId())
+                            if(channels[i].clients[client].id() == sinusbot.getBotId())
                                 botChannel = channels[i];
-                            if(channels[i].clients[client].uid == ev.clientUid)
+                            if(channels[i].clients[client].uid() == ev.client.uid())
                                 userChannel = channels[i];
                         }
                     }
 
                     if(botChannel == userChannel && botChannel != null){
-                        parseVote(ev.clientUid);
+                        parseVote(ev.client.uid());
                     } else {
-                        sinusbot.chatPrivate(ev.clientId, "You must be in the same channel as the bot to vote.");
+                        sinusbot.chatPrivate(ev.client.id(), "You must be in the same channel as the bot to vote.");
                     }
                 }
             }
     });
+    var initialCount = 1;
 
-    sinusbot.on('clientCount', function(ev) {
-        if(ev.count > 2)
-            neededVotes = Math.max(2, Math.ceil(ev.count / 2));
+    function recalculateVote(count) {
+        sinusbot.chatChannel(" -- Can now see " + count);
+        if(count > 2)
+            neededVotes = Math.max(2, Math.ceil(count / 2));
         else
             neededVotes = 1;
-    });
+    };
 
     function parseVote(clientUID){
         if(votedUsers.indexOf(clientUID) === -1){
@@ -67,6 +72,16 @@ registerPlugin({
                 if(config.AnnounceVoteStatus != 1)
                     sinusbot.chatChannel(" -- " + votedUsers.length + "/" + neededVotes + " votes to skip current song -- ");
             }
+        } else {
+            sinusbot.chatPrivate(clientUID, "You have already voted. The vote is currently at [ " + votedUsers.length + " / " + neededVotes + " ] to skip current song");
         }
     }
+
+    setInterval(function() {
+        if(initialCount != backend.getCurrentChannel().getClientCount()) {
+            initialCount = backend.getCurrentChannel().getClientCount();
+            recalculateVote(initialCount);
+        }
+    }, 100);
+    
 });
