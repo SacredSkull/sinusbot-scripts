@@ -54,7 +54,7 @@ registerPlugin({
     var initialCount = 1;
 
     function recalculateVote(count) {
-        sinusbot.chatChannel(" -- Can now see " + count);
+        //sinusbot.chatChannel(" -- Can now see " + count);
         if(count > 2)
             neededVotes = Math.max(2, Math.ceil(count / 2));
         else
