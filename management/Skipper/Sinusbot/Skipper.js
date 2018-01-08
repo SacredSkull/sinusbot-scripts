@@ -78,9 +78,11 @@ registerPlugin({
     }
 
     setInterval(function() {
-        if(initialCount != backend.getCurrentChannel().getClientCount()) {
-            initialCount = backend.getCurrentChannel().getClientCount();
-            recalculateVote(initialCount);
+        if('undefined' !== typeof backend.getCurrentChannel()) {
+            if(initialCount != backend.getCurrentChannel().getClientCount()) {
+                initialCount = backend.getCurrentChannel().getClientCount();
+                recalculateVote(initialCount);
+            }
         }
     }, 100);
     
