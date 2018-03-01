@@ -1,4 +1,4 @@
-registerPlugin({
+2   registerPlugin({
     name: "Now Playing",
     version: "0.6",
     description: "Sick of users asking what song that is? No longer!",
@@ -103,7 +103,7 @@ registerPlugin({
     }
 
     function ComposeSpacerName(trackInfo, channelFormat, defaultChannelFormat) {
-        sinusbot.log("Found " + trackInfo);
+        engine.log("Found " + trackInfo);
         if('undefined' !== typeof trackInfo) {
             trackInfo = String(trackInfo);
             if(!trackInfo.length > 0) {
@@ -123,7 +123,7 @@ registerPlugin({
             trackInfo = trackInfo.substring(0, Math.min(availableLength - 3, trackInfo.length));
             fullTitle = original.replace(/%trackInfo/gi, trackInfo + "...");
 
-            sinusbot.log("Was too long, now truncated to: " + original);
+            engine.log("Was too long, now truncated to: " + original);
             return fullTitle;
         }
 
@@ -165,7 +165,7 @@ registerPlugin({
             });
         }
 
-        sinusbot.log("Received new track event for " + ev.title() + " by " + ev.artist());
+        engine.log("Received new track event for " + ev.title() + " by " + ev.artist());
         var rawTitle = "Unknown";
         var rawArtist = "Unknown";
         var title = "";
