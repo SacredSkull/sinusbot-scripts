@@ -1,6 +1,6 @@
-2   registerPlugin({
+registerPlugin({
     name: "Now Playing",
-    version: "0.6",
+    version: "0.61",
     description: "Sick of users asking what song that is? No longer!",
     author: "SacredSkull <me@sacredskull.net>",
     license: "MIT",
