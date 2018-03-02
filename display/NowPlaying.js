@@ -1,6 +1,6 @@
 registerPlugin({
     name: "Now Playing",
-    version: "0.61",
+    version: "0.62",
     description: "Sick of users asking what song that is? No longer!",
     author: "SacredSkull <me@sacredskull.net>",
     license: "MIT",
@@ -139,15 +139,11 @@ registerPlugin({
         if(media.getQueue().length == 0 && !audio.isPlaying()) {
             lastTrackGuard = false;
             if('undefined' !== typeof config.TitleChannel){
-                sinusbot.channelUpdate(config.TitleChannel, {
-                    "name": config.NothingPlayingName
-                });
+                backend.getChannelByID(config.TitleChannel).setName(config.NothingPlayingName);
             }
 
             if('undefined' !== typeof config.ArtistChannel){
-                sinusbot.channelUpdate(config.ArtistChannel, {
-                    "name": ComposeSpacerName("-", defaultArtistFormat, defaultArtistFormat)
-                });
+                backend.getChannelByID(config.ArtistChannel).setName(ComposeSpacerName("-", defaultArtistFormat, defaultArtistFormat));
             }
         }
     });
@@ -155,14 +151,10 @@ registerPlugin({
     var trackRegex = new RegExp(/^(.*?)[ ]?(?:[-,] (.*?)$|(?: ['"])(.*?)['"]$)/i);
     events.on('trackInfo', function(ev) {
         if('undefined' !== typeof config.TitleChannel){
-            sinusbot.channelUpdate(config.TitleChannel, {
-                "name": "[cspacer0]"
-            });
+            backend.getChannelByID(config.TitleChannel).setName("[cspacer0]");
         }
         if('undefined' !== typeof config.ArtistChannel){
-            sinusbot.channelUpdate(config.ArtistChannel, {
-                "name": "[cspacer0]"
-            });
+            backend.getChannelByID(config.ArtistChannel).setName("[cspacer0]");
         }
 
         engine.log("Received new track event for " + ev.title() + " by " + ev.artist());
@@ -225,14 +217,11 @@ registerPlugin({
         }
 
         if('undefined' !== typeof config.TitleChannel) {
-            sinusbot.channelUpdate(config.TitleChannel, {
-                "name": title
-            });
+            backend.getChannelByID(config.TitleChannel).setName(title);
         }
+
         if('undefined' !== typeof config.ArtistChannel){
-            sinusbot.channelUpdate(config.ArtistChannel, {
-                "name": artist
-            });
+            backend.getChannelByID(config.ArtistChannel).setName(artist);
         }
 
         if(config.changeNick == 0){
@@ -268,7 +257,7 @@ registerPlugin({
                     }
                 }
             }
-            sinusbot.setNick(nickTitle + seperator + nickArtist);
+            engine.setNick(nickTitle + seperator + nickArtist);
         }
 
         var fullyCleaned = rawTitle + ", by " + rawArtist;
@@ -278,14 +267,13 @@ registerPlugin({
             // Clean up names for TTS.
             var ttsFriendly = new RegExp(/[^\w\s]/gi);
             if(config.cleanTTS == 0)
-                sinusbot.say(fullyCleaned.replace(ttsFriendly, "").replace(/ft[.]*?/gi, 'feat'));
+                audio.say(fullyCleaned.replace(ttsFriendly, "").replace(/ft[.]*?/gi, 'feat'));
             else
-                sinusbot.say(fullyCleaned);
+                audio.say(fullyCleaned);
         }
 
         if(config.channelAnnounce == 0){
-            sinusbot.chatChannel(fullyCleaned);
+            backend.getCurrentChannel().chat(fullyCleaned);
         }
-
     });
 });
