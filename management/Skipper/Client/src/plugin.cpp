@@ -1,7 +1,7 @@
 /*
- * TeamSpeak 3 demo plugin
+ * TeamSpeak 3 Skipper companion plugin
  *
- * Copyright (c) 2008-2017 TeamSpeak Systems GmbH
+ * Copyright (c) 2018 Peter Clotworthy
  */
 
 #ifdef _WIN32
@@ -174,7 +174,7 @@ void ts3plugin_freeMemory(void* data) {
 
 // Handle hotkey
 void ts3plugin_onHotkeyEvent(const char* keyword) {
-	printf("PLUGIN: Hotkey event: %s\n", keyword);
+	printf("SKIPPER: Hotkey event: %s\n", keyword);
 	if (strcmp("skipper_skip", keyword) == 0 && ServerConnectionHandlerID != NULL) {
 		uint64 channelID = NULL;
 		if(ClientID != NULL && ts3Functions.getChannelOfClient(ServerConnectionHandlerID, ClientID, &channelID) == ERROR_ok)
